@@ -4,37 +4,36 @@ const { createClient } = require("@supabase/supabase-js");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Check env variables
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
-  console.error("Supabase environment variables missing!");
-}
+// Middleware
+app.use(express.json());
+app.use(express.static("public"));
 
-// Supabase client
+// Supabase
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
 
-// Root route
-app.get("/", (req, res) => {
-  res.send("Cloud-Based Web Application Successfully Deployed on Render!");
+// GET data
+app.get("/test-db", async (req, res) => {
+  const { data, error } = await supabase
+    .from("test")
+    .select("*");
+
+  if (error) return res.status(500).json(error);
+  res.json(data);
 });
 
-// Test DB route
-app.get("/test-db", async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from("test")
-      .select("*");
+// POST data
+app.post("/add-name", async (req, res) => {
+  const { name } = req.body;
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
+  const { data, error } = await supabase
+    .from("test")
+    .insert([{ name }]);
 
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: "Unexpected error" });
-  }
+  if (error) return res.status(500).json(error);
+  res.json(data);
 });
 
 app.listen(PORT, () => {

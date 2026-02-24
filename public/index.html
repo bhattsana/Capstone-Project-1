@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My App</title>
+</head>
+<body>
+
+<h2>Add Name</h2>
+
+<input type="text" id="nameInput" placeholder="Enter name">
+<button onclick="addName()">Add</button>
+
+<h3>Names List:</h3>
+<ul id="list"></ul>
+
+<script>
+
+async function loadData() {
+  const res = await fetch("/test-db");
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item.name;
+    list.appendChild(li);
+  });
+}
+
+async function addName() {
+  const name = document.getElementById("nameInput").value;
+
+  await fetch("/add-name", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name })
+  });
+
+  document.getElementById("nameInput").value = "";
+  loadData();
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
